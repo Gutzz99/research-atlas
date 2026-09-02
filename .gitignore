@@ -1,23 +1,21 @@
-# Virtual Environment
+# Environment & Secrets
+.env
+.env.local
 venv/
-env/
-ENV/
+.venv/
 
-# Data Directories (Jaga agar data mentah & olahan tidak masuk Git)
+# Large Datasets (Local-Sensitive Data)
 data/raw/
 data/processed/
 
-# Python Cache & Artifacts
+# Neo4j Local Volume / Logs
+neo4j/data/
+neo4j/logs/
+
+# Python Cache
 __pycache__/
 *.py[cod]
-*$py.class
-.pytest_cache/
 
-# Streamlit & IDE configs
-.streamlit/
+# IDE
 .vscode/
 .idea/
-
-# System files
-.DS_Store
-Thumbs.db
