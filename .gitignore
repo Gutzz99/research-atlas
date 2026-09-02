@@ -1,0 +1,23 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Data Directories (Jaga agar data mentah & olahan tidak masuk Git)
+data/raw/
+data/processed/
+
+# Python Cache & Artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Streamlit & IDE configs
+.streamlit/
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db
