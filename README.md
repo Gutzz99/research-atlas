@@ -128,6 +128,8 @@ USER_EMAIL=your.email@example.com
 
 ### 3. Spin Up Graph Database
 
+> Research Atlas uses Neo4j Graph Data Science (GDS), which requires the Neo4j Enterprise edition. The Docker setup therefore uses `neo4j:5.18.0-enterprise` and enables the GDS plugin.
+
 ```bash
 docker compose up -d
 ```
@@ -142,7 +144,7 @@ python run_graph_loading.py
 python run_analytics.py
 
 # Launch Streamlit Application
-streamlit run dashboard/app.py
+streamlit run dashboard/app_working.py
 ```
 
 *Access the app at `http://localhost:8501`.*

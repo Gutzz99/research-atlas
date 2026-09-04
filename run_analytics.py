@@ -2,6 +2,7 @@ import os
 import logging
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
+from neo4j.exceptions import ClientError
 
 from src.analysis.centrality import GraphCentralityAnalyzer
 from src.analysis.communities import CommunityDetector
@@ -10,10 +11,29 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
+def ensure_gds_available(driver):
+    """Validate that Neo4j Graph Data Science is enabled before running analytics."""
+    with driver.session() as session:
+        try:
+            session.run("CALL gds.version() YIELD gdsVersion RETURN gdsVersion AS version").single()
+        except ClientError as exc:
+            raise RuntimeError(
+                "Neo4j GDS is not available in the current database. "
+                "Use the Neo4j Enterprise image and set NEO4J_ACCEPT_LICENSE_AGREEMENT=yes. "
+                "The project Docker config must use neo4j:5.18.0-enterprise."
+            ) from exc
+
+
 def run_gds_analytics_pipeline(neo4j_uri: str, neo4j_auth: tuple, graph_name: str = "citation-graph"):
     """Executes GDS graph projection, PageRank centrality, and Louvain community detection."""
     logger.info(f"Connecting to Neo4j instance at {neo4j_uri}...")
     driver = GraphDatabase.driver(neo4j_uri, auth=neo4j_auth)
+
+    try:
+        ensure_gds_available(driver)
+    except Exception:
+        driver.close()
+        raise
 
     centrality_analyzer = GraphCentralityAnalyzer(driver)
     community_detector = CommunityDetector(driver)
@@ -43,7 +63,6 @@ def run_gds_analytics_pipeline(neo4j_uri: str, neo4j_auth: tuple, graph_name: st
 if __name__ == "__main__":
     load_dotenv()
 
-    processed_file = os.getenv("PROCESSED_DATA_PATH", "data/processed/graph_data_clean.json")
     uri = os.getenv("NEO4J_URI", "bolt://localhost:7687")
     user = os.getenv("NEO4J_USER", "neo4j")
     password = os.getenv("NEO4J_PASSWORD")
@@ -51,4 +70,4 @@ if __name__ == "__main__":
     if not password:
         raise ValueError("NEO4J_PASSWORD is not set in environment variables or .env file.")
 
-    load_graph_pipeline(processed_file, uri, (user, password))
+    run_gds_analytics_pipeline(uri, (user, password))
